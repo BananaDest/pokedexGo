@@ -1,3 +1,4 @@
+// Package pokeapi get locationArea
 package pokeapi
 
 import (
@@ -5,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	pokecache "github.com/BananaDest/pokedexGo/internal/pokecache"
 )
 
 type LocationArea struct {
@@ -18,6 +21,16 @@ type LocationArea struct {
 }
 
 func GetLocationAreas(url string) (LocationArea, error) {
+	cache := pokecache.NewCache(10000)
+	entry, exists := cache.Get(url)
+	if exists {
+		locationArea := LocationArea{}
+		err := json.Unmarshal(entry, &locationArea)
+		if err != nil {
+			return LocationArea{}, err
+		}
+		return locationArea, nil
+	}
 	res, err := http.Get(url)
 	if err != nil {
 		return LocationArea{}, err
@@ -28,8 +41,9 @@ func GetLocationAreas(url string) (LocationArea, error) {
 		return LocationArea{}, err
 	}
 	if res.StatusCode > 299 {
-		return LocationArea{}, fmt.Errorf("Non success status code: %v", res.Status)
+		return LocationArea{}, fmt.Errorf("non success status code: %v", res.Status)
 	}
+	cache.Add(url, body)
 	locationArea := LocationArea{}
 	err = json.Unmarshal(body, &locationArea)
 	if err != nil {

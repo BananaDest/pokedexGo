@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	pokeapi "github.com/BananaDest/pokedexGo/pokeAPI"
 )
 

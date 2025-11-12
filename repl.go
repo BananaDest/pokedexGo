@@ -1,11 +1,10 @@
 package main
 
-import "strings"
-
 import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -24,7 +23,7 @@ func StartRepl() {
 		scanner.Scan()
 
 		input := scanner.Text()
-		cleaned := cleanInput(input)
+		cleaned := CleanInput(input)
 		if len(cleaned) == 0 {
 			continue
 		}
@@ -41,7 +40,7 @@ func StartRepl() {
 	}
 }
 
-func cleanInput(text string) []string {
+func CleanInput(text string) []string {
 	lowerText := strings.ToLower(text)
 	words := strings.Fields(lowerText)
 	return words
