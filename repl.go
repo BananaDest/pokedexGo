@@ -5,18 +5,24 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	pokeapi "github.com/BananaDest/pokedexGo/pokeAPI"
 )
 
 type Config struct {
-	Next     string
-	Previous string
+	Next       string
+	Previous   string
+	Parameters map[string]string
+	Pokedex    map[string]pokeapi.Pokemon
 }
 
 func StartRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 	conf := Config{
-		Next:     "https://pokeapi.co/api/v2//location-area",
-		Previous: "https://pokeapi.co/api/v2//location-area",
+		Next:       "https://pokeapi.co/api/v2",
+		Previous:   "https://pokeapi.co/api/v2",
+		Parameters: make(map[string]string),
+		Pokedex:    make(map[string]pokeapi.Pokemon),
 	}
 	for {
 		fmt.Print("Pokedex > ")
@@ -31,6 +37,20 @@ func StartRepl() {
 		if !ok {
 			fmt.Println("Unknown command")
 			continue
+		}
+		if command.name == "explore" {
+			if len(cleaned) > 2 {
+				fmt.Println("Missing Argument: Location area name")
+				continue
+			}
+			conf.Parameters["locationArea"] = cleaned[1]
+		}
+		if command.name == "catch" || command.name == "inspect" {
+			if len(cleaned) > 2 {
+				fmt.Println("Missing Argument: pokemon name")
+				continue
+			}
+			conf.Parameters["name"] = cleaned[1]
 		}
 		err := command.callback(&conf)
 		if err != nil {
@@ -73,6 +93,26 @@ func GetCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Return Previous 20 locations",
 			callback:    CommandMapB,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Lists all pokemon in location",
+			callback:    CommandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Catch a pokemon",
+			callback:    CommandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect a pokemon",
+			callback:    CommandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Returns pokedex",
+			callback:    CommandPokedex,
 		},
 	}
 }
